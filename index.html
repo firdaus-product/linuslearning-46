@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ms-MY">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kemahiran Pemulihan: Belajar tentang Wang (Pembelajaran)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { box-sizing: border-box; }
+    .activity-card { min-height: 400px; }
+    .interactive-item { transition: all .3s ease; cursor: pointer; }
+    .interactive-item:hover { transform: scale(1.05); }
+    .dragging { opacity: .5; transform: rotate(5deg); }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed #cbd5e1;
+      transition: all .3s ease;
+      min-height: 100px;
+    }
+    .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
+
+    /* Salah */
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+    .shake { animation: shake 0.5s ease; }
+
+    /* Drop zone diisi */
+    .drop-zone-filled {
+      border-style: solid;
+      border-color: #4ade80;
+      background-color: #f0fdf4;
+    }
+    
+    /* === Gaya Khas Wang === */
+    .coin {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border: 3px solid #a1a1aa;
+      color: #3f3f46;
+      background-color: #e4e4e7;
+    }
+    .coin:hover { border-color: #f59e0b; background-color: #fef3c7; }
+    .note {
+      width: 130px; height: 65px;
+      border: 2px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    .note-rm1 { border-color: #2563eb; background-color: #dbeafe; color: #1e3a8a; }
+    .note-rm5 { border-color: #16a34a; background-color: #dcfce7; color: #15803d; }
+    .note-rm10 { border-color: #dc2626; background-color: #fee2e2; color: #991b1b; }
+    .note-rm50 { border-color: #0d9488; background-color: #ccfbf1; color: #115e59; }
+
+    /* === CSS TAMBAHAN UNTUK AKTIVITI 1 (BARU) === */
+    .note-sm {
+      width: 90px; height: 45px;
+      font-size: 0.875rem;
+    }
+    .coin-sm {
+      width: 40px; height: 40px;
+      font-size: 0.75rem;
+      border-width: 2px;
+    }
+    .coin-sm span { font-size: 0.6rem; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-full">
+
+  <div class="bg-yellow-100 border-b-4 border-yellow-300 p-4 shadow-sm sticky top-0 z-10">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">💡</span>
+        <span id="info-text" class="text-lg font-semibold text-gray-800">
+          Pilih aktiviti untuk mula belajar tentang wang!
+        </span>
+      </div>
+      <button id="speak-btn"
+              class="bg-yellow-300 hover:bg-yellow-400 text-yellow-800 font-bold py-2 px-4 rounded-full text-xl transition-colors duration-200"
+              onclick="speakInfo()">
+        🔊
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto p-6">
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6 activity-card flex items-center justify-center">
+      <div id="activity-content" class="text-center w-full">
+        <div class="py-16">
+          <div class="text-6xl">💰</div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Kemahiran Pemulihan: Jom Belajar Wang
+          </h2>
+          <p class="text-xl text-gray-600 mb-8">
+            Pilih aktiviti di bawah untuk meneroka menambah, menolak, dan menggunakan wang.
+          </p>
+          <div class="text-4xl">👇</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Pilih Aktiviti</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <button onclick="loadActivity(1)"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
+          🔄 Mesin Tukar Duit
+        </button>
+        <button onclick="loadActivity(2)"
+                class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
+          💰 Mari Menabung
+        </button>
+        <button onclick="loadActivity(3)"
+                class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
+          🍦 Jom Beli Aiskrim
+        </button>
+        <button onclick="loadActivity(4)"
+                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
+          🎟️ Dompet Zoo
+        </button>
+        <button onclick="loadActivity(5)"
+                class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
+          🐘 Bajet Lawatan Zoo
+        </button>
+      </div>
+
+      <div class="flex justify-center gap-4">
+        <button onclick="clearActivity()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-lg transition-colors duration-200">
+          🧹 Bersih
+        </button>
+        <button onclick="nextActivity()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg text-lg transition-colors duration-200">
+          ➡️ Seterusnya
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentActivity = 0;
+    let ttsEnabled = false;
+    let currentInfo = "Pilih aktiviti untuk mula belajar tentang wang!";
+    let draggedElement = null;
+
+    // State untuk aktiviti
+    window.tabungTotal = 0;
+    window.dompetTotal = 0;
+    window.zooBudget = 0;
+
+    /* ====== TTS ====== */
+    function speak(text) {
+      if (!ttsEnabled) return;
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      setTimeout(() => {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'ms-MY';
+        u.rate = 0.9; u.pitch = 1.05;
+        const voices = window.speechSynthesis.getVoices();
+        const ms = voices.find(v => v.lang === 'ms-MY' || (v.lang && v.lang.startsWith('ms')));
+        if (ms) u.voice = ms;
+        window.speechSynthesis.speak(u);
+      }, 100);
+    }
+    function setInfo(text) { currentInfo = text; document.getElementById('info-text').textContent = text; }
+    function speakInfo() {
+      if (!ttsEnabled) {
+        ttsEnabled = true;
+        const btn = document.getElementById('speak-btn');
+        btn.classList.add('bg-green-300', 'hover:bg-green-400');
+        btn.classList.remove('bg-yellow-300', 'hover:bg-yellow-400');
+      }
+      speak(currentInfo);
+    }
+
+    /* ====== DnD helpers ====== */
+    function dragStart(e) { draggedElement = e.target; e.target.classList.add('dragging'); }
+    function dragEnd(e) { e.target.classList.remove('dragging'); document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('drag-over')); }
+    function allowDrop(e) { e.preventDefault(); if (e.currentTarget.classList.contains('drop-zone')) e.currentTarget.classList.add('drag-over'); }
+    function dragLeave(e) { if (e.currentTarget.classList.contains('drop-zone')) e.currentTarget.classList.remove('drag-over'); }
+
+    /* ====== Router ====== */
+    function loadActivity(n) {
+      currentActivity = n;
+      const content = document.getElementById('activity-content');
+      if (n === 1) return loadActivity1_TukarDuit(content);
+      if (n === 2) return loadActivity2_Menabung(content);
+      if (n === 3) return loadActivity3_BeliAiskrim(content);
+      if (n === 4) return loadActivity4_DompetZoo(content);
+      if (n === 5) return loadActivity5_LawatanZoo(content);
+    }
+
+    /* ====== Aktiviti 1: Mesin Tukar Duit (Nilai Setara) ====== */
+    function loadActivity1_TukarDuit(content) {
+      setInfo("Klik wang di sebelah kiri. Lihat mesin menukarnya kepada nilai yang sama.");
+      content.innerHTML = `
+        <h3 class="text-2xl font-bold text-blue-600 mb-6">🔄 Mesin Tukar Duit (Nilai Setara)</h3>
+        <p class="text-lg text-gray-600 mb-6">Klik wang untuk ditukar. Lihat apa yang keluar!</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div>
+            <h4 class="text-lg font-semibold mb-3">Klik Wang (Input):</h4>
+            <div class="flex flex-col items-center gap-4 p-4 bg-gray-100 rounded-lg">
+              <div class="interactive-item note note-rm10" onclick="showExchange('rm10')">RM10</div>
+              <div class="interactive-item note note-rm5" onclick="showExchange('rm5')">RM5</div>
+              <div class="interactive-item note note-rm1" onclick="showExchange('rm1')">RM1</div>
+              <div class="interactive-item coin" onclick="showExchange('sen50')">50 <span class="text-xs ml-1">sen</span></div>
+              <div class="interactive-item coin" onclick="showExchange('sen20')">20 <span class="text-xs ml-1">sen</span></div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold mb-3">Hasil Tukaran (Output):</h4>
+            <div id="exchange-output" class="p-6 min-h-[300px] flex flex-wrap items-center justify-center gap-3 bg-blue-50 rounded-lg border-2 border-blue-200">
+              <span class="text-gray-500">Pilih wang untuk ditukar...</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function showExchange(type) {
+      const output = document.getElementById('exchange-output');
+      let html = '';
+      let msg = '';
+      
+      switch (type) {
+        case 'rm10':
+          html = `
+            <div class="note note-sm note-rm5">RM5</div>
+            <div class="note note-sm note-rm5">RM5</div>
+          `;
+          msg = "Sepuluh ringgit... sama dengan... dua keping lima ringgit!";
+          break;
+        case 'rm5':
+          html = `
+            <div class="note note-sm note-rm1">RM1</div>
+            <div class="note note-sm note-rm1">RM1</div>
+            <div class="note note-sm note-rm1">RM1</div>
+            <div class="note note-sm note-rm1">RM1</div>
+            <div class="note note-sm note-rm1">RM1</div>
+          `;
+          msg = "Lima ringgit... sama dengan... lima keping satu ringgit!";
+          break;
+        case 'rm1':
+          html = `
+            <div class="coin coin-sm">50 <span class="text-xs ml-1">sen</span></div>
+            <div class="coin coin-sm">50 <span class="text-xs ml-1">sen</span></div>
+          `;
+          msg = "Satu ringgit... sama dengan... dua keping lima puluh sen!";
+          break;
+        case 'sen50':
+          html = `
+            <div class="coin coin-sm">20 <span class="text-xs ml-1">sen</span></div>
+            <div class="coin coin-sm">20 <span class="text-xs ml-1">sen</span></div>
+            <div class="coin coin-sm">10 <span class="text-xs ml-1">sen</span></div>
+          `;
+          msg = "Lima puluh sen... sama dengan... dua keping dua puluh sen dan satu keping sepuluh sen!";
+          break;
+        case 'sen20':
+          html = `
+            <div class="coin coin-sm">10 <span class="text-xs ml-1">sen</span></div>
+            <div class="coin coin-sm">10 <span class="text-xs ml-1">sen</span></div>
+          `;
+          msg = "Dua puluh sen... sama dengan... dua keping sepuluh sen!";
+          break;
+      }
+      
+      output.innerHTML = html;
+      setInfo(msg);
+      speak(msg);
+    }
+    
+    /* ====== Aktiviti 2: Mari Menabung (Tambah Wang) ====== */
+    function loadActivity2_Menabung(content) {
+      setInfo("Jom menabung! Seret wang dari dompet ke dalam tabung.");
+      window.tabungTotal = 0;
+      content.innerHTML = `
+        <h3 class="text-2xl font-bold text-green-600 mb-6">💰 Mari Menabung (Tambah)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div>
+            <h4 class="text-lg font-semibold mb-3">Dompet (Pilih dari sini):</h4>
+            <div class="flex flex-wrap justify-center gap-4 p-4 bg-gray-100 rounded-lg">
+              <div class="interactive-item note note-rm1 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
+              <div class="interactive-item note note-rm1 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
+              <div class="interactive-item note note-rm5 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold mb-3">Tabung (Letak di sini):</h4>
+            <div id="tabung-drop-zone" class="drop-zone rounded-lg p-6 flex flex-col items-center justify-center bg-green-50"
+                 ondrop="dropOnTabung(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+              <span class="text-6xl">💰</span>
+              <span id="tabung-total" class="text-3xl font-bold text-green-800 mt-4">RM0</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function dropOnTabung(e) {
+      e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+      if (!draggedElement) return;
+      
+      const value = parseInt(draggedElement.dataset.value);
+      window.tabungTotal += value;
+      
+      document.getElementById('tabung-total').textContent = `RM${window.tabungTotal}`;
+      
+      // Sembunyikan wang yang telah diseret
+      draggedElement.style.display = 'none';
+      draggedElement = null;
+      
+      const msg = `Bagus! Masuk RM${value}. Jumlah sekarang RM${window.tabungTotal}.`;
+      setInfo(msg); speak(msg);
+      
+      if (document.querySelectorAll('[draggable="true"][style*="display: none"]').length === 3) {
+        setInfo(`Syabas! Semua wang sudah ditabung. Jumlah akhir RM${window.tabungTotal}.`);
+        speak(`Syabas! Semua wang sudah ditabung. Jumlah akhir RM${window.tabungTotal}.`);
+      }
+    }
+
+    /* ====== Aktiviti 3: Jom Beli Aiskrim (Tolak Wang) ====== */
+    function loadActivity3_BeliAiskrim(content) {
+      setInfo("Anda ada RM5. Aiskrim berharga RM2. Seret wang RM5 untuk bayar.");
+      content.innerHTML = `
+        <h3 class="text-2xl font-bold text-purple-600 mb-6">🍦 Jom Beli Aiskrim (Tolak)</h3>
+        
+        <div class="flex flex-col items-center gap-6">
+          <div class="text-center">
+            <h4 class="text-lg font-semibold">Dompet Anda:</h4>
+            <div id="dompet-beli" class="p-4 bg-gray-100 rounded-lg inline-block">
+              <div class="interactive-item note note-rm5 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
+            </div>
+          </div>
+          
+          <div class="text-center w-full">
+            <h4 class="text-lg font-semibold">Kaunter (Bayar di sini):</h4>
+            <div id="kaunter-drop-zone" class="drop-zone rounded-lg p-6 bg-purple-50"
+                 ondrop="dropOnKaunter(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+              <div class="text-lg font-bold">Aiskrim 🍦</div>
+              <div class="text-2xl font-bold text-purple-800">Harga: RM2</div>
+            </div>
+          </div>
+
+          <div id="baki-container" class="text-center hidden">
+            <h4 class="text-xl font-bold text-green-600">Terima Kasih!</h4>
+            <p class="text-lg">Anda bayar RM5. Harga RM2.</p>
+            <p class="text-2xl font-bold">Baki Anda: RM3</p>
+            <div class="flex justify-center gap-2 mt-2">
+              <div class="note note-rm1">RM1</div>
+              <div class="note note-rm1">RM1</div>
+              <div class="note note-rm1">RM1</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function dropOnKaunter(e) {
+      e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+      if (!draggedElement || draggedElement.dataset.value !== '5') {
+        setInfo("Bukan itu. Sila guna wang RM5."); speak("Bukan itu. Sila guna wang RM5.");
+        if (draggedElement) { draggedElement.classList.add('shake'); setTimeout(()=>draggedElement.classList.remove('shake'), 500); }
+        return;
+      }
+      
+      // Sembunyikan dompet dan kaunter
+      document.getElementById('dompet-beli').style.display = 'none';
+      document.getElementById('kaunter-drop-zone').style.display = 'none';
+      
+      // Tunjukkan Baki
+      document.getElementById('baki-container').classList.remove('hidden');
+      
+      const msg = "Berjaya! Anda bayar RM5 untuk aiskrim RM2. Baki anda ialah RM3.";
+      setInfo(msg); speak(msg);
+      draggedElement = null;
+    }
+
+    /* ====== Aktiviti 4: Dompet Zoo (Kumpul Wang) ====== */
+    function loadActivity4_DompetZoo(content) {
+      setInfo("Tiket zoo berharga RM15. Seret wang ke dompet sehingga cukup RM15.");
+      window.dompetTotal = 0;
+      content.innerHTML = `
+        <h3 class="text-2xl font-bold text-orange-600 mb-6">🎟️ Dompet Zoo (Sedia Duit)</h3>
+        
+        <div class="text-center mb-6 p-4 bg-orange-100 rounded-lg">
+          <h4 class="text-xl font-semibold">Target: RM15.00</h4>
+          <p class="text-3xl font-bold text-orange-800" id="dompet-total">Dompet: RM0.00</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-lg font-semibold mb-3">Bank (Ambil dari sini):</h4>
+            <div class="flex flex-wrap justify-center gap-4 p-4 bg-gray-100 rounded-lg">
+              <div class="interactive-item note note-rm1 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
+              <div class="interactive-item note note-rm5 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
+              <div class="interactive-item note note-rm10 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="10">RM10</div>
+            </div>
+          </div>
+          <div>
+            <h4 class="text-lg font-semibold mb-3">Dompet Anda (Letak di sini):</h4>
+            <div id="dompet-drop-zone" class="drop-zone rounded-lg p-6 bg-orange-50 flex flex-wrap gap-2"
+                 ondrop="dropOnDompet(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+              </div>
+          </div>
+        </div>
+      `;
+    }
+    function dropOnDompet(e) {
+      e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+      if (!draggedElement) return;
+
+      const value = parseInt(draggedElement.dataset.value);
+      window.dompetTotal += value;
+      
+      const totalDisplay = document.getElementById('dompet-total');
+      totalDisplay.textContent = `Dompet: RM${window.dompetTotal}.00`;
+      
+      // Klonkan elemen untuk tunjukkan ia dalam dompet
+      const newMoney = draggedElement.cloneNode(true);
+      newMoney.removeAttribute('draggable');
+      newMoney.classList.remove('cursor-move', 'interactive-item');
+      e.currentTarget.appendChild(newMoney);
+      
+      // Jangan alih 'draggedElement' dari bank, supaya boleh diguna lagi
+      draggedElement = null; 
+      
+      if (window.dompetTotal === 15) {
+        const msg = "Syabas! Anda ada RM15. Cukup untuk beli tiket!";
+        setInfo(msg); speak(msg);
+        totalDisplay.classList.add('text-green-600', 'bg-green-100');
+      } else if (window.dompetTotal > 15) {
+        const msg = `Oh! RM${window.dompetTotal}. Terlebih! Cuba 'Bersih' dan mula semula.`;
+        setInfo(msg); speak(msg);
+        totalDisplay.classList.add('text-red-600', 'bg-red-100');
+      } else {
+        const msg = `OK. Sekarang ada RM${window.dompetTotal}. Perlu lagi...`;
+        setInfo(msg); speak(msg);
+      }
+    }
+
+    /* ====== Aktiviti 5: Bajet Lawatan Zoo (Selesai Masalah) ====== */
+    function loadActivity5_LawatanZoo(content) {
+      setInfo("Anda ada bajet RM50. Klik 'Beli' untuk membelanjakan wang anda.");
+      window.zooBudget = 50;
+      content.innerHTML = `
+        <h3 class="text-2xl font-bold text-red-600 mb-6">🐘 Bajet Lawatan Zoo (Belanja)</h3>
+        
+        <div class="text-center mb-6 p-4 bg-red-100 rounded-lg">
+          <h4 class="text-xl font-semibold">Bajet Anda:</h4>
+          <p class="text-4xl font-bold text-red-800" id="budget-display">RM50</p>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div>
+              <p class="text-2xl">🎟️ Tiket Masuk</p>
+              <p class="text-xl font-bold text-gray-700">Harga: RM15</p>
+            </div>
+            <button id="btn-tiket" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg"
+                    onclick="beliItem(15, 'Tiket', this)">
+              Beli
+            </button>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div>
+              <p class="text-2xl">🍦 Aiskrim</p>
+              <p class="text-xl font-bold text-gray-700">Harga: RM3</p>
+            </div>
+            <button id="btn-aiskrim" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg"
+                    onclick="beliItem(3, 'Aiskrim', this)">
+              Beli
+            </button>
+          </div>
+          <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div>
+              <p class="text-2xl">🧸 Cenderamata</p>
+              <p class="text-xl font-bold text-gray-700">Harga: RM10</p>
+            </div>
+            <button id="btn-cenderamata" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg"
+                    onclick="beliItem(10, 'Cenderamata', this)">
+              Beli
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    function beliItem(price, itemName, buttonElement) {
+      if (window.zooBudget >= price) {
+        window.zooBudget -= price;
+        
+        const display = document.getElementById('budget-display');
+        display.textContent = `RM${window.zooBudget}`;
+        
+        buttonElement.disabled = true;
+        buttonElement.textContent = "Dibeli!";
+        buttonElement.classList.remove('bg-red-500', 'hover:bg-red-600');
+        buttonElement.classList.add('bg-gray-400', 'cursor-not-allowed');
+        
+        const msg = `Berjaya beli ${itemName}. Baki anda RM${window.zooBudget}.`;
+        setInfo(msg); speak(msg);
+      } else {
+        const msg = `Oh! Tidak cukup wang untuk ${itemName}. Baki anda hanya RM${window.zooBudget}.`;
+        setInfo(msg); speak(msg);
+        const display = document.getElementById('budget-display');
+        display.classList.add('shake');
+        setTimeout(()=>display.classList.remove('shake'), 500);
+      }
+    }
+
+    /* ====== Kawalan Umum ====== */
+    function clearActivity() {
+      currentActivity = 0;
+      document.getElementById('activity-content').innerHTML = `
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">💰</div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Kemahiran Pemulihan: Jom Belajar Wang
+          </h2>
+          <p class="text-xl text-gray-600 mb-8">
+            Pilih aktiviti di bawah untuk meneroka menambah, menolak, dan menggunakan wang.
+          </p>
+          <div class="text-4xl">👇</div>
+        </div>
+      `;
+      setInfo("Pilih aktiviti untuk mula belajar tentang wang!");
+    }
+    
+    function nextActivity() {
+      if (currentActivity === 0) return loadActivity(1);
+      if (currentActivity < 5) return loadActivity(currentActivity + 1);
+      return loadActivity(1);
+    }
+
+    // Kekalkan TTS resume pada sesetengah pelayar
+    if ('speechSynthesis' in window) {
+      setInterval(() => { if (window.speechSynthesis.paused) window.speechSynthesis.resume(); }, 1000);
+    }
+  </script>
+</body>
+</html>
