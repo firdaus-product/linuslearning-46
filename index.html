@@ -3,229 +3,233 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kemahiran Pemulihan: Belajar tentang Wang (Pembelajaran)</title>
+  <title>Kemahiran Pemulihan: Belajar Wang</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
-    body { box-sizing: border-box; }
-    .activity-card { min-height: 400px; }
-    .interactive-item { transition: all .3s ease; cursor: pointer; }
-    .interactive-item:hover { transform: scale(1.05); }
-    .dragging { opacity: .5; transform: rotate(5deg); }
-
-    /* Drop zone */
-    .drop-zone {
-      border: 2px dashed #cbd5e1;
-      transition: all .3s ease;
-      min-height: 100px;
-    }
-    .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
-
-    /* Salah */
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
-    }
-    .shake { animation: shake 0.5s ease; }
-
-    /* Drop zone diisi */
-    .drop-zone-filled {
-      border-style: solid;
-      border-color: #4ade80;
-      background-color: #f0fdf4;
+    /* --- UI STYLE (MASTER REFERENCE - TEMA HIJAU) --- */
+    body { 
+        font-family: 'Fredoka', sans-serif; 
+        background-color: #f0fdf4; 
+        background-image: radial-gradient(#86efac 2px, transparent 2px); 
+        background-size: 30px 30px; 
     }
     
-    /* === Gaya Khas Wang === */
-    .coin {
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      border: 3px solid #a1a1aa;
-      color: #3f3f46;
-      background-color: #e4e4e7;
+    .game-card { 
+        background: white; 
+        border: 4px solid #475569; 
+        box-shadow: 8px 8px 0px #00000020; 
+        border-radius: 1.5rem; 
+        min-height: 600px; 
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
     }
-    .coin:hover { border-color: #f59e0b; background-color: #fef3c7; }
-    .note {
-      width: 130px; height: 65px;
-      border: 2px solid;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      font-weight: bold;
-      border-radius: 4px;
+    
+    /* Buttons */
+    .btn-3d { 
+        transition: all 0.1s; 
+        border-bottom-width: 6px; 
+        border-color: rgba(0,0,0,0.2); 
+        transform: translateY(0); 
+        cursor: pointer; 
+        display: inline-block; 
     }
-    .note-rm1 { border-color: #2563eb; background-color: #dbeafe; color: #1e3a8a; }
-    .note-rm5 { border-color: #16a34a; background-color: #dcfce7; color: #15803d; }
-    .note-rm10 { border-color: #dc2626; background-color: #fee2e2; color: #991b1b; }
-    .note-rm50 { border-color: #0d9488; background-color: #ccfbf1; color: #115e59; }
+    .btn-3d:active:not(:disabled) { transform: translateY(4px); border-bottom-width: 2px; box-shadow: none; }
+    .btn-3d:disabled { opacity: 0.6; cursor: not-allowed; border-bottom-width: 6px; filter: grayscale(100%); }
 
-    /* === CSS TAMBAHAN UNTUK AKTIVITI 1 (BARU) === */
-    .note-sm {
-      width: 90px; height: 45px;
-      font-size: 0.875rem;
+    /* Animation */
+    .shake { animation: shake 0.4s ease-in-out; border-color: #ef4444 !important; background-color: #fee2e2 !important; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px) rotate(-5deg); } 75% { transform: translateX(8px) rotate(5deg); } }
+
+    /* --- STYLE KHUSUS WANG (MASTER) --- */
+    .draggable { cursor: grab; user-select: none; transition: transform 0.2s; }
+    .draggable:active { cursor: grabbing; transform: scale(1.1); }
+    
+    .drop-zone { 
+        border: 3px dashed #94a3b8; background-color: #f8fafc; 
+        transition: all .3s ease; border-radius: 0.75rem; 
+        min-width: 80px; min-height: 80px; 
+        display: flex; flex-wrap: wrap; gap: 5px;
+        align-items: center; justify-content: center;
+        font-weight: bold; color: #334155;
     }
-    .coin-sm {
-      width: 40px; height: 40px;
-      font-size: 0.75rem;
-      border-width: 2px;
+    .drop-zone.drag-over { border-color: #3b82f6; background-color: #dbeafe; transform: scale(1.05); }
+
+    /* Gaya Wang Kertas */
+    .money-card { 
+        width: 120px; height: 60px; display: flex; align-items: center; justify-content: center;
+        border: 2px solid; border-radius: 8px; font-weight: 800; font-size: 1.2rem; 
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        background-color: white;
     }
-    .coin-sm span { font-size: 0.6rem; }
+    .money-card.rm1 { background: #e0f2fe; border-color: #38bdf8; color: #0284c7; }
+    .money-card.rm5 { background: #dcfce7; border-color: #4ade80; color: #16a34a; }
+    .money-card.rm10 { background: #fee2e2; border-color: #f87171; color: #dc2626; }
+    .money-card.rm20 { background: #fef9c3; border-color: #facc15; color: #ca8a04; }
+    .money-card.rm50 { background: #e0e7ff; border-color: #818cf8; color: #4f46e5; }
+
+    /* Gaya Syiling */
+    .coin-card { 
+        width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        border: 2px solid; font-weight: bold; font-size: 0.9rem;
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+    }
+    .coin-card.silver { background: #e2e8f0; border-color: #94a3b8; color: #475569; }
+    .coin-card.gold { background: #fef08a; border-color: #eab308; color: #a16207; }
+
+    /* Gaya Item Kedai (Zoo/Shop) */
+    .shop-item {
+        border: 2px solid #e5e7eb; background: white; border-radius: 1rem; padding: 10px;
+        display: flex; flex-direction: column; align-items: center; cursor: pointer;
+        transition: all 0.2s;
+    }
+    .shop-item:hover { border-color: #f87171; transform: translateY(-5px); }
+
+    /* Helper untuk aktiviti Exchange */
+    .interactive-item { cursor: pointer; transition: transform 0.1s; }
+    .interactive-item:active { transform: scale(0.95); }
+
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-full">
+<body class="min-h-screen text-slate-800 pb-10">
 
-  <div class="bg-yellow-100 border-b-4 border-yellow-300 p-4 shadow-sm sticky top-0 z-10">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
+  <div class="fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none">
+    <div class="max-w-4xl mx-auto bg-green-400 border-4 border-green-600 rounded-full px-6 py-3 shadow-xl flex items-center justify-between pointer-events-auto transform hover:scale-[1.01] transition-transform">
       <div class="flex items-center gap-3">
-        <span class="text-2xl">💡</span>
-        <span id="info-text" class="text-lg font-semibold text-gray-800">
-          Pilih aktiviti untuk mula belajar tentang wang!
-        </span>
+        <span class="text-3xl animate-bounce">💡</span>
+        <span id="info-text" class="text-xl font-bold text-green-900 leading-none mt-1">Pilih aktiviti untuk mula!</span>
       </div>
-      <button id="speak-btn"
-              class="bg-yellow-300 hover:bg-yellow-400 text-yellow-800 font-bold py-2 px-4 rounded-full text-xl transition-colors duration-200"
-              onclick="speakInfo()">
-        🔊
-      </button>
+      <button id="speak-btn" onclick="speakInfo()" class="bg-white hover:bg-green-50 text-green-600 border-2 border-green-200 rounded-full p-2 transition-colors shadow-sm">🔊</button>
     </div>
   </div>
+  <div class="h-24"></div>
 
-  <div class="max-w-6xl mx-auto p-6">
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-6 activity-card flex items-center justify-center">
-      <div id="activity-content" class="text-center w-full">
-        <div class="py-16">
-          <div class="text-6xl">💰</div>
-          <h2 class="text-3xl font-bold text-gray-800 mb-4">
-            Kemahiran Pemulihan: Jom Belajar Wang
-          </h2>
-          <p class="text-xl text-gray-600 mb-8">
-            Pilih aktiviti di bawah untuk meneroka menambah, menolak, dan menggunakan wang.
-          </p>
-          <div class="text-4xl">👇</div>
+  <div class="max-w-6xl mx-auto p-4">
+    
+    <div class="game-card p-8 mb-8">
+        <div id="activity-content" class="w-full relative z-10 flex flex-col items-center justify-center h-full transition-opacity duration-200">
+            <div class="py-10 text-center">
+                <div class="text-8xl mb-6 animate-pulse">💰</div>
+                <h2 class="text-5xl font-bold text-emerald-600 mb-4">Jom Belajar Wang</h2>
+                <p class="text-2xl text-slate-500 mb-8 font-semibold">Aktiviti Zoo, Aiskrim & Tabung.</p>
+                <div class="text-4xl animate-bounce">👇</div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg p-6">
-      <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Pilih Aktiviti</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <button onclick="loadActivity(1)"
-                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
-          🔄 Mesin Tukar Duit
-        </button>
-        <button onclick="loadActivity(2)"
-                class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
-          💰 Mari Menabung
-        </button>
-        <button onclick="loadActivity(3)"
-                class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
-          🍦 Jom Beli Aiskrim
-        </button>
-        <button onclick="loadActivity(4)"
-                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
-          🎟️ Dompet Zoo
-        </button>
-        <button onclick="loadActivity(5)"
-                class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200">
-          🐘 Bajet Lawatan Zoo
-        </button>
+    <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-6 border-2 border-white">
+      <h3 class="text-2xl font-bold text-slate-700 mb-4 text-center">🎮 Pilih Aktiviti</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+        <button onclick="loadActivity(1)" class="btn-3d bg-blue-500 text-white font-bold py-4 px-2 rounded-xl text-lg">🔄 Tukar Duit</button>
+        <button onclick="loadActivity(2)" class="btn-3d bg-green-500 text-white font-bold py-4 px-2 rounded-xl text-lg">💰 Menabung</button>
+        <button onclick="loadActivity(3)" class="btn-3d bg-purple-500 text-white font-bold py-4 px-2 rounded-xl text-lg">🍦 Beli Aiskrim</button>
+        <button onclick="loadActivity(4)" class="btn-3d bg-orange-500 text-white font-bold py-4 px-2 rounded-xl text-lg">🎟️ Dompet Zoo</button>
+        <button onclick="loadActivity(5)" class="btn-3d bg-red-500 text-white font-bold py-4 px-2 rounded-xl text-lg">🐘 Bajet Zoo</button>
       </div>
 
-      <div class="flex justify-center gap-4">
-        <button onclick="clearActivity()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-lg transition-colors duration-200">
-          🧹 Bersih
-        </button>
-        <button onclick="nextActivity()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg text-lg transition-colors duration-200">
-          ➡️ Seterusnya
-        </button>
+      <div class="flex justify-center gap-4 border-t-2 border-slate-100 pt-6">
+        <button onclick="clearActivity()" class="btn-3d bg-slate-400 text-white font-bold py-2 px-6 rounded-full text-lg">🏠 Menu</button>
+        <button onclick="nextActivity()" class="btn-3d bg-indigo-500 text-white font-bold py-2 px-8 rounded-full text-xl">Seterusnya ➡️</button>
       </div>
     </div>
   </div>
 
   <script>
+    /* --- STANDARD HELPERS --- */
     let currentActivity = 0;
     let ttsEnabled = false;
-    let currentInfo = "Pilih aktiviti untuk mula belajar tentang wang!";
+    let currentInfo = "Pilih aktiviti untuk mula belajar wang!";
     let draggedElement = null;
+    
+    // State Aktiviti
+    let tabungTotal = 0;
+    let dompetTotal = 0;
+    let zooBudget = 0;
 
-    // State untuk aktiviti
-    window.tabungTotal = 0;
-    window.dompetTotal = 0;
-    window.zooBudget = 0;
+    function triggerWin() { confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); }
 
-    /* ====== TTS ====== */
-    function speak(text) {
-      if (!ttsEnabled) return;
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      setTimeout(() => {
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'ms-MY';
-        u.rate = 0.9; u.pitch = 1.05;
-        const voices = window.speechSynthesis.getVoices();
-        const ms = voices.find(v => v.lang === 'ms-MY' || (v.lang && v.lang.startsWith('ms')));
-        if (ms) u.voice = ms;
-        window.speechSynthesis.speak(u);
-      }, 100);
+    function speak(text) { 
+        if (!ttsEnabled || !('speechSynthesis' in window)) return; 
+        window.speechSynthesis.cancel(); 
+        const u = new SpeechSynthesisUtterance(text); u.lang = 'ms-MY'; u.rate = 0.95; u.pitch = 1.05; 
+        const ms = window.speechSynthesis.getVoices().find(v => v.lang === 'ms-MY' || v.lang?.startsWith('ms')); 
+        if (ms) u.voice = ms; 
+        window.speechSynthesis.speak(u); 
     }
-    function setInfo(text) { currentInfo = text; document.getElementById('info-text').textContent = text; }
-    function speakInfo() {
-      if (!ttsEnabled) {
-        ttsEnabled = true;
-        const btn = document.getElementById('speak-btn');
-        btn.classList.add('bg-green-300', 'hover:bg-green-400');
-        btn.classList.remove('bg-yellow-300', 'hover:bg-yellow-400');
-      }
-      speak(currentInfo);
+    
+    function setInfo(text) { 
+        currentInfo = text; const infoEl = document.getElementById('info-text'); 
+        infoEl.style.opacity = 0; setTimeout(() => { infoEl.textContent = text; infoEl.style.opacity = 1; }, 200); 
+    }
+    
+    function speakInfo() { 
+        if (!ttsEnabled) { ttsEnabled = true; document.getElementById('speak-btn').classList.add('bg-green-100', 'text-green-600'); } 
+        speak(currentInfo); 
     }
 
-    /* ====== DnD helpers ====== */
-    function dragStart(e) { draggedElement = e.target; e.target.classList.add('dragging'); }
-    function dragEnd(e) { e.target.classList.remove('dragging'); document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('drag-over')); }
-    function allowDrop(e) { e.preventDefault(); if (e.currentTarget.classList.contains('drop-zone')) e.currentTarget.classList.add('drag-over'); }
-    function dragLeave(e) { if (e.currentTarget.classList.contains('drop-zone')) e.currentTarget.classList.remove('drag-over'); }
+    /* --- DRAG & DROP HELPERS --- */
+    window.dragStart = function(e) { draggedElement = e.target; e.target.classList.add('opacity-50'); }
+    window.dragEnd = function(e) { if(e.target) e.target.classList.remove('opacity-50'); document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('drag-over')); }
+    window.allowDrop = function(e) { e.preventDefault(); if (e.currentTarget.classList.contains('drop-zone')) e.currentTarget.classList.add('drag-over'); }
+    window.dragLeave = function(e) { if (e.currentTarget.classList.contains('drop-zone')) e.currentTarget.classList.remove('drag-over'); }
 
-    /* ====== Router ====== */
+    /* --- ROUTER --- */
     function loadActivity(n) {
       currentActivity = n;
       const content = document.getElementById('activity-content');
-      if (n === 1) return loadActivity1_TukarDuit(content);
-      if (n === 2) return loadActivity2_Menabung(content);
-      if (n === 3) return loadActivity3_BeliAiskrim(content);
-      if (n === 4) return loadActivity4_DompetZoo(content);
-      if (n === 5) return loadActivity5_LawatanZoo(content);
+      content.style.opacity = 0;
+      setTimeout(() => {
+          if (n === 1) loadActivity1_TukarDuit(content);
+          if (n === 2) loadActivity2_Menabung(content);
+          if (n === 3) loadActivity3_BeliAiskrim(content);
+          if (n === 4) loadActivity4_DompetZoo(content);
+          if (n === 5) loadActivity5_LawatanZoo(content);
+          content.style.opacity = 1;
+      }, 200);
     }
 
-    /* ====== Aktiviti 1: Mesin Tukar Duit (Nilai Setara) ====== */
-    function loadActivity1_TukarDuit(content) {
-      setInfo("Klik wang di sebelah kiri. Lihat mesin menukarnya kepada nilai yang sama.");
-      content.innerHTML = `
-        <h3 class="text-2xl font-bold text-blue-600 mb-6">🔄 Mesin Tukar Duit (Nilai Setara)</h3>
-        <p class="text-lg text-gray-600 mb-6">Klik wang untuk ditukar. Lihat apa yang keluar!</p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">Klik Wang (Input):</h4>
-            <div class="flex flex-col items-center gap-4 p-4 bg-gray-100 rounded-lg">
-              <div class="interactive-item note note-rm10" onclick="showExchange('rm10')">RM10</div>
-              <div class="interactive-item note note-rm5" onclick="showExchange('rm5')">RM5</div>
-              <div class="interactive-item note note-rm1" onclick="showExchange('rm1')">RM1</div>
-              <div class="interactive-item coin" onclick="showExchange('sen50')">50 <span class="text-xs ml-1">sen</span></div>
-              <div class="interactive-item coin" onclick="showExchange('sen20')">20 <span class="text-xs ml-1">sen</span></div>
-            </div>
-          </div>
+    function clearActivity() {
+        currentActivity = 0;
+        document.getElementById('activity-content').innerHTML = `<div class="py-10 text-center"><div class="text-8xl mb-6 animate-pulse">💰</div><h2 class="text-5xl font-bold text-emerald-600 mb-4">Jom Belajar Wang</h2><p class="text-2xl text-slate-500 mb-8 font-semibold">Pilih butang di bawah.</p></div>`;
+        setInfo("Pilih aktiviti untuk mula belajar!");
+    }
+    function nextActivity() { let next = currentActivity + 1; if (next > 5) next = 1; loadActivity(next); }
 
-          <div>
-            <h4 class="text-lg font-semibold mb-3">Hasil Tukaran (Output):</h4>
-            <div id="exchange-output" class="p-6 min-h-[300px] flex flex-wrap items-center justify-center gap-3 bg-blue-50 rounded-lg border-2 border-blue-200">
-              <span class="text-gray-500">Pilih wang untuk ditukar...</span>
+
+    /* =========================================
+       LOGIK AKTIVITI (DARI KOD KEDUA ANDA)
+       ========================================= */
+
+    /* 1. Mesin Tukar Duit (Nilai Setara) */
+    function loadActivity1_TukarDuit(content) {
+      setInfo("Klik wang di sebelah kiri. Lihat tukarannya.");
+      content.innerHTML = `
+        <div class="w-full max-w-5xl">
+          <h3 class="text-3xl font-bold text-blue-600 mb-6 text-center">🔄 Mesin Tukar Duit</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="bg-slate-100 p-6 rounded-3xl border-2 border-slate-200">
+               <h4 class="text-slate-500 font-bold mb-4 text-center uppercase">Pilih Wang (Input)</h4>
+               <div class="flex flex-wrap justify-center gap-4">
+                  <div class="money-card rm10 interactive-item" onclick="showExchange('rm10')">RM10</div>
+                  <div class="money-card rm5 interactive-item" onclick="showExchange('rm5')">RM5</div>
+                  <div class="money-card rm1 interactive-item" onclick="showExchange('rm1')">RM1</div>
+                  <div class="coin-card gold interactive-item" onclick="showExchange('sen50')">50s</div>
+                  <div class="coin-card gold interactive-item" onclick="showExchange('sen20')">20s</div>
+               </div>
+            </div>
+
+            <div class="bg-blue-50 p-6 rounded-3xl border-2 border-blue-200 shadow-inner">
+               <h4 class="text-blue-600 font-bold mb-4 text-center uppercase">Hasil Tukaran</h4>
+               <div id="exchange-output" class="min-h-[200px] flex flex-wrap items-center justify-center gap-3">
+                  <span class="text-slate-400 font-bold text-xl">Klik wang untuk mula...</span>
+               </div>
             </div>
           </div>
         </div>
@@ -234,323 +238,263 @@
 
     function showExchange(type) {
       const output = document.getElementById('exchange-output');
-      let html = '';
-      let msg = '';
+      let html = ''; let msg = '';
       
+      // Helper utk buat card kecil
+      const smClass = "scale-90"; 
+
       switch (type) {
         case 'rm10':
-          html = `
-            <div class="note note-sm note-rm5">RM5</div>
-            <div class="note note-sm note-rm5">RM5</div>
-          `;
+          html = `<div class="money-card rm5 ${smClass}">RM5</div><div class="money-card rm5 ${smClass}">RM5</div>`;
           msg = "Sepuluh ringgit... sama dengan... dua keping lima ringgit!";
           break;
         case 'rm5':
-          html = `
-            <div class="note note-sm note-rm1">RM1</div>
-            <div class="note note-sm note-rm1">RM1</div>
-            <div class="note note-sm note-rm1">RM1</div>
-            <div class="note note-sm note-rm1">RM1</div>
-            <div class="note note-sm note-rm1">RM1</div>
-          `;
+          html = Array(5).fill(`<div class="money-card rm1 ${smClass}">RM1</div>`).join('');
           msg = "Lima ringgit... sama dengan... lima keping satu ringgit!";
           break;
         case 'rm1':
-          html = `
-            <div class="coin coin-sm">50 <span class="text-xs ml-1">sen</span></div>
-            <div class="coin coin-sm">50 <span class="text-xs ml-1">sen</span></div>
-          `;
+          html = `<div class="coin-card gold scale-125">50s</div><div class="coin-card gold scale-125">50s</div>`;
           msg = "Satu ringgit... sama dengan... dua keping lima puluh sen!";
           break;
         case 'sen50':
-          html = `
-            <div class="coin coin-sm">20 <span class="text-xs ml-1">sen</span></div>
-            <div class="coin coin-sm">20 <span class="text-xs ml-1">sen</span></div>
-            <div class="coin coin-sm">10 <span class="text-xs ml-1">sen</span></div>
-          `;
-          msg = "Lima puluh sen... sama dengan... dua keping dua puluh sen dan satu keping sepuluh sen!";
+          html = `<div class="coin-card gold">20s</div><div class="coin-card gold">20s</div><div class="coin-card silver">10s</div>`;
+          msg = "Lima puluh sen... sama dengan... 20 sen, 20 sen dan 10 sen!";
           break;
         case 'sen20':
-          html = `
-            <div class="coin coin-sm">10 <span class="text-xs ml-1">sen</span></div>
-            <div class="coin coin-sm">10 <span class="text-xs ml-1">sen</span></div>
-          `;
+          html = `<div class="coin-card silver">10s</div><div class="coin-card silver">10s</div>`;
           msg = "Dua puluh sen... sama dengan... dua keping sepuluh sen!";
           break;
       }
       
       output.innerHTML = html;
-      setInfo(msg);
-      speak(msg);
+      setInfo(msg); speak(msg);
     }
-    
-    /* ====== Aktiviti 2: Mari Menabung (Tambah Wang) ====== */
-    function loadActivity2_Menabung(content) {
-      setInfo("Jom menabung! Seret wang dari dompet ke dalam tabung.");
-      window.tabungTotal = 0;
-      content.innerHTML = `
-        <h3 class="text-2xl font-bold text-green-600 mb-6">💰 Mari Menabung (Tambah)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <div>
-            <h4 class="text-lg font-semibold mb-3">Dompet (Pilih dari sini):</h4>
-            <div class="flex flex-wrap justify-center gap-4 p-4 bg-gray-100 rounded-lg">
-              <div class="interactive-item note note-rm1 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
-              <div class="interactive-item note note-rm1 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
-              <div class="interactive-item note note-rm5 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
-            </div>
-          </div>
 
-          <div>
-            <h4 class="text-lg font-semibold mb-3">Tabung (Letak di sini):</h4>
-            <div id="tabung-drop-zone" class="drop-zone rounded-lg p-6 flex flex-col items-center justify-center bg-green-50"
-                 ondrop="dropOnTabung(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-              <span class="text-6xl">💰</span>
-              <span id="tabung-total" class="text-3xl font-bold text-green-800 mt-4">RM0</span>
-            </div>
+    /* 2. Mari Menabung (Tambah) */
+    function loadActivity2_Menabung(content) {
+      setInfo("Seret wang dari dompet ke dalam tabung.");
+      tabungTotal = 0;
+      content.innerHTML = `
+        <div class="w-full max-w-4xl text-center">
+          <h3 class="text-3xl font-bold text-green-600 mb-6">💰 Mari Menabung</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div class="bg-slate-100 p-6 rounded-3xl border-2 border-slate-200">
+                <h4 class="text-slate-500 font-bold mb-4 uppercase">Dompet</h4>
+                <div class="flex flex-wrap justify-center gap-3">
+                   <div class="money-card rm1 draggable" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
+                   <div class="money-card rm1 draggable" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
+                   <div class="money-card rm5 draggable" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
+                </div>
+             </div>
+
+             <div class="bg-green-50 p-6 rounded-3xl border-2 border-green-200">
+                <h4 class="text-green-700 font-bold mb-4 uppercase">Tabung</h4>
+                <div id="tabung-drop-zone" class="drop-zone min-h-[200px] bg-white rounded-2xl border-green-300"
+                     ondrop="dropOnTabung(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                    <div class="text-6xl opacity-20 absolute">🐖</div>
+                </div>
+                <div class="text-3xl font-black text-green-800 mt-4" id="tabung-total">RM 0</div>
+             </div>
           </div>
         </div>
       `;
     }
+
     function dropOnTabung(e) {
       e.preventDefault(); e.currentTarget.classList.remove('drag-over');
       if (!draggedElement) return;
       
       const value = parseInt(draggedElement.dataset.value);
-      window.tabungTotal += value;
+      tabungTotal += value;
+      document.getElementById('tabung-total').textContent = `RM ${tabungTotal}`;
       
-      document.getElementById('tabung-total').textContent = `RM${window.tabungTotal}`;
-      
-      // Sembunyikan wang yang telah diseret
+      // Hide dragged element instead of removing (logic from Act 2)
       draggedElement.style.display = 'none';
       draggedElement = null;
       
-      const msg = `Bagus! Masuk RM${value}. Jumlah sekarang RM${window.tabungTotal}.`;
+      const msg = `Masuk RM${value}. Jumlah RM${tabungTotal}.`;
       setInfo(msg); speak(msg);
       
+      // Check win condition
       if (document.querySelectorAll('[draggable="true"][style*="display: none"]').length === 3) {
-        setInfo(`Syabas! Semua wang sudah ditabung. Jumlah akhir RM${window.tabungTotal}.`);
-        speak(`Syabas! Semua wang sudah ditabung. Jumlah akhir RM${window.tabungTotal}.`);
+         triggerWin();
+         speak("Syabas! Tabung penuh.");
+         setTimeout(() => loadActivity(2), 3000);
       }
     }
 
-    /* ====== Aktiviti 3: Jom Beli Aiskrim (Tolak Wang) ====== */
+    /* 3. Jom Beli Aiskrim (Tolak) */
     function loadActivity3_BeliAiskrim(content) {
-      setInfo("Anda ada RM5. Aiskrim berharga RM2. Seret wang RM5 untuk bayar.");
+      setInfo("Aiskrim RM2. Anda ada RM5. Sila bayar.");
       content.innerHTML = `
-        <h3 class="text-2xl font-bold text-purple-600 mb-6">🍦 Jom Beli Aiskrim (Tolak)</h3>
-        
-        <div class="flex flex-col items-center gap-6">
-          <div class="text-center">
-            <h4 class="text-lg font-semibold">Dompet Anda:</h4>
-            <div id="dompet-beli" class="p-4 bg-gray-100 rounded-lg inline-block">
-              <div class="interactive-item note note-rm5 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
-            </div>
-          </div>
-          
-          <div class="text-center w-full">
-            <h4 class="text-lg font-semibold">Kaunter (Bayar di sini):</h4>
-            <div id="kaunter-drop-zone" class="drop-zone rounded-lg p-6 bg-purple-50"
-                 ondrop="dropOnKaunter(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-              <div class="text-lg font-bold">Aiskrim 🍦</div>
-              <div class="text-2xl font-bold text-purple-800">Harga: RM2</div>
-            </div>
-          </div>
+        <div class="w-full max-w-md text-center">
+           <h3 class="text-3xl font-bold text-purple-600 mb-6">🍦 Kedai Aiskrim</h3>
+           
+           <div class="bg-purple-50 p-6 rounded-3xl border-2 border-purple-200 mb-6">
+              <div class="text-8xl mb-2">🍦</div>
+              <div class="text-3xl font-black text-purple-800 mb-4">Harga: RM2</div>
+              
+              <div id="kaunter-drop-zone" class="drop-zone bg-white min-h-[120px] rounded-xl mb-4 relative"
+                   ondrop="dropOnKaunterAiskrim(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                   <span class="text-slate-400 absolute">Letak Duit Sini</span>
+              </div>
+           </div>
 
-          <div id="baki-container" class="text-center hidden">
-            <h4 class="text-xl font-bold text-green-600">Terima Kasih!</h4>
-            <p class="text-lg">Anda bayar RM5. Harga RM2.</p>
-            <p class="text-2xl font-bold">Baki Anda: RM3</p>
-            <div class="flex justify-center gap-2 mt-2">
-              <div class="note note-rm1">RM1</div>
-              <div class="note note-rm1">RM1</div>
-              <div class="note note-rm1">RM1</div>
-            </div>
-          </div>
+           <div id="dompet-beli" class="bg-slate-100 p-4 rounded-2xl border-2 border-slate-200 inline-block">
+              <h4 class="text-slate-500 font-bold mb-2 text-sm uppercase">Dompet Anda</h4>
+              <div class="money-card rm5 draggable cursor-move mx-auto" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
+           </div>
+
+           <div id="baki-container" class="hidden mt-4 animate-bounce">
+              <h4 class="text-xl font-bold text-green-600">Baki Anda: RM3</h4>
+              <div class="flex justify-center gap-2 mt-2">
+                 <div class="money-card rm1 scale-75">RM1</div>
+                 <div class="money-card rm1 scale-75">RM1</div>
+                 <div class="money-card rm1 scale-75">RM1</div>
+              </div>
+           </div>
         </div>
       `;
     }
-    function dropOnKaunter(e) {
+
+    function dropOnKaunterAiskrim(e) {
       e.preventDefault(); e.currentTarget.classList.remove('drag-over');
       if (!draggedElement || draggedElement.dataset.value !== '5') {
-        setInfo("Bukan itu. Sila guna wang RM5."); speak("Bukan itu. Sila guna wang RM5.");
-        if (draggedElement) { draggedElement.classList.add('shake'); setTimeout(()=>draggedElement.classList.remove('shake'), 500); }
-        return;
+         speak("Sila guna wang RM5.");
+         return;
       }
       
-      // Sembunyikan dompet dan kaunter
-      document.getElementById('dompet-beli').style.display = 'none';
-      document.getElementById('kaunter-drop-zone').style.display = 'none';
+      // Logic UI
+      document.getElementById('dompet-beli').style.opacity = '0';
+      document.getElementById('kaunter-drop-zone').innerHTML = ''; // clear text
+      const clone = draggedElement.cloneNode(true);
+      clone.removeAttribute('draggable'); clone.classList.remove('draggable');
+      document.getElementById('kaunter-drop-zone').appendChild(clone);
       
-      // Tunjukkan Baki
       document.getElementById('baki-container').classList.remove('hidden');
-      
-      const msg = "Berjaya! Anda bayar RM5 untuk aiskrim RM2. Baki anda ialah RM3.";
-      setInfo(msg); speak(msg);
-      draggedElement = null;
+      triggerWin();
+      speak("Terima kasih! Ini baki RM3 anda.");
+      setTimeout(() => loadActivity(3), 4000);
     }
 
-    /* ====== Aktiviti 4: Dompet Zoo (Kumpul Wang) ====== */
+    /* 4. Dompet Zoo (Target) */
     function loadActivity4_DompetZoo(content) {
-      setInfo("Tiket zoo berharga RM15. Seret wang ke dompet sehingga cukup RM15.");
-      window.dompetTotal = 0;
+      setInfo("Kumpul RM15 untuk tiket Zoo.");
+      dompetTotal = 0;
       content.innerHTML = `
-        <h3 class="text-2xl font-bold text-orange-600 mb-6">🎟️ Dompet Zoo (Sedia Duit)</h3>
-        
-        <div class="text-center mb-6 p-4 bg-orange-100 rounded-lg">
-          <h4 class="text-xl font-semibold">Target: RM15.00</h4>
-          <p class="text-3xl font-bold text-orange-800" id="dompet-total">Dompet: RM0.00</p>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="text-lg font-semibold mb-3">Bank (Ambil dari sini):</h4>
-            <div class="flex flex-wrap justify-center gap-4 p-4 bg-gray-100 rounded-lg">
-              <div class="interactive-item note note-rm1 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
-              <div class="interactive-item note note-rm5 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
-              <div class="interactive-item note note-rm10 cursor-move" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="10">RM10</div>
+         <div class="w-full max-w-4xl text-center">
+            <h3 class="text-3xl font-bold text-orange-600 mb-4">🎟️ Dompet Zoo</h3>
+            
+            <div class="bg-orange-100 border-2 border-orange-300 rounded-2xl p-4 mb-6 inline-block px-10">
+               <div class="text-sm text-orange-800 font-bold uppercase">Target</div>
+               <div class="text-4xl font-black text-orange-600">RM 15</div>
             </div>
-          </div>
-          <div>
-            <h4 class="text-lg font-semibold mb-3">Dompet Anda (Letak di sini):</h4>
-            <div id="dompet-drop-zone" class="drop-zone rounded-lg p-6 bg-orange-50 flex flex-wrap gap-2"
-                 ondrop="dropOnDompet(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
-              </div>
-          </div>
-        </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+               <div class="bg-slate-100 p-6 rounded-3xl border-2 border-slate-200">
+                  <h4 class="text-slate-500 font-bold mb-4 uppercase">Bank Wang</h4>
+                  <div class="flex flex-wrap justify-center gap-3">
+                     <div class="money-card rm1 draggable" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="1">RM1</div>
+                     <div class="money-card rm5 draggable" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="5">RM5</div>
+                     <div class="money-card rm10 draggable" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)" data-value="10">RM10</div>
+                  </div>
+               </div>
+
+               <div class="bg-orange-50 p-6 rounded-3xl border-2 border-orange-200">
+                  <h4 class="text-orange-700 font-bold mb-2 uppercase">Dompet Anda</h4>
+                  <div id="dompet-drop-zone" class="drop-zone min-h-[200px] bg-white rounded-xl items-start content-start p-2"
+                       ondrop="dropOnDompet(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div>
+                  <div class="mt-4 text-2xl font-black text-slate-700" id="dompet-total-display">Total: RM 0</div>
+               </div>
+            </div>
+         </div>
       `;
     }
+
     function dropOnDompet(e) {
       e.preventDefault(); e.currentTarget.classList.remove('drag-over');
       if (!draggedElement) return;
 
-      const value = parseInt(draggedElement.dataset.value);
-      window.dompetTotal += value;
+      const val = parseInt(draggedElement.dataset.value);
+      dompetTotal += val;
       
-      const totalDisplay = document.getElementById('dompet-total');
-      totalDisplay.textContent = `Dompet: RM${window.dompetTotal}.00`;
+      const clone = draggedElement.cloneNode(true);
+      clone.classList.remove('draggable'); clone.removeAttribute('draggable');
+      e.currentTarget.appendChild(clone);
       
-      // Klonkan elemen untuk tunjukkan ia dalam dompet
-      const newMoney = draggedElement.cloneNode(true);
-      newMoney.removeAttribute('draggable');
-      newMoney.classList.remove('cursor-move', 'interactive-item');
-      e.currentTarget.appendChild(newMoney);
-      
-      // Jangan alih 'draggedElement' dari bank, supaya boleh diguna lagi
-      draggedElement = null; 
-      
-      if (window.dompetTotal === 15) {
-        const msg = "Syabas! Anda ada RM15. Cukup untuk beli tiket!";
-        setInfo(msg); speak(msg);
-        totalDisplay.classList.add('text-green-600', 'bg-green-100');
-      } else if (window.dompetTotal > 15) {
-        const msg = `Oh! RM${window.dompetTotal}. Terlebih! Cuba 'Bersih' dan mula semula.`;
-        setInfo(msg); speak(msg);
-        totalDisplay.classList.add('text-red-600', 'bg-red-100');
+      const display = document.getElementById('dompet-total-display');
+      display.textContent = `Total: RM ${dompetTotal}`;
+
+      if (dompetTotal === 15) {
+         display.classList.add('text-green-600');
+         speak("Syabas! Cukup RM15."); triggerWin();
+         setTimeout(() => loadActivity(4), 3000);
+      } else if (dompetTotal > 15) {
+         display.classList.add('text-red-500');
+         speak("Terlebih! Sila reset.");
+         display.parentElement.classList.add('shake');
+         setTimeout(() => loadActivity(4), 2000);
       } else {
-        const msg = `OK. Sekarang ada RM${window.dompetTotal}. Perlu lagi...`;
-        setInfo(msg); speak(msg);
+         speak(`RM ${dompetTotal}. Tambah lagi.`);
       }
     }
 
-    /* ====== Aktiviti 5: Bajet Lawatan Zoo (Selesai Masalah) ====== */
+    /* 5. Bajet Lawatan Zoo */
     function loadActivity5_LawatanZoo(content) {
-      setInfo("Anda ada bajet RM50. Klik 'Beli' untuk membelanjakan wang anda.");
-      window.zooBudget = 50;
+      setInfo("Bajet RM50. Klik 'Beli' barang yang anda mahu.");
+      zooBudget = 50;
+      const items = [
+         { name: 'Tiket', price: 15, icon: '🎟️' },
+         { name: 'Aiskrim', price: 3, icon: '🍦' },
+         { name: 'Patung', price: 10, icon: '🧸' }
+      ];
+
       content.innerHTML = `
-        <h3 class="text-2xl font-bold text-red-600 mb-6">🐘 Bajet Lawatan Zoo (Belanja)</h3>
-        
-        <div class="text-center mb-6 p-4 bg-red-100 rounded-lg">
-          <h4 class="text-xl font-semibold">Bajet Anda:</h4>
-          <p class="text-4xl font-bold text-red-800" id="budget-display">RM50</p>
-        </div>
-        
-        <div class="space-y-4">
-          <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
-            <div>
-              <p class="text-2xl">🎟️ Tiket Masuk</p>
-              <p class="text-xl font-bold text-gray-700">Harga: RM15</p>
-            </div>
-            <button id="btn-tiket" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg"
-                    onclick="beliItem(15, 'Tiket', this)">
-              Beli
-            </button>
-          </div>
-          <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
-            <div>
-              <p class="text-2xl">🍦 Aiskrim</p>
-              <p class="text-xl font-bold text-gray-700">Harga: RM3</p>
-            </div>
-            <button id="btn-aiskrim" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg"
-                    onclick="beliItem(3, 'Aiskrim', this)">
-              Beli
-            </button>
-          </div>
-          <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
-            <div>
-              <p class="text-2xl">🧸 Cenderamata</p>
-              <p class="text-xl font-bold text-gray-700">Harga: RM10</p>
-            </div>
-            <button id="btn-cenderamata" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg"
-                    onclick="beliItem(10, 'Cenderamata', this)">
-              Beli
-            </button>
-          </div>
+        <div class="w-full max-w-4xl text-center">
+           <h3 class="text-3xl font-bold text-red-600 mb-4">🐘 Bajet Zoo</h3>
+           
+           <div class="bg-red-100 border-2 border-red-300 rounded-full px-8 py-3 mb-8 inline-block">
+               <span class="text-xl text-red-800 font-bold mr-2">Baki Bajet:</span>
+               <span id="budget-display" class="text-4xl font-black text-red-600">RM 50</span>
+           </div>
+
+           <div class="flex flex-wrap justify-center gap-6">
+              ${items.map(i => `
+                 <div class="shop-item w-48 p-6" id="btn-${i.name}">
+                    <div class="text-6xl mb-4">${i.icon}</div>
+                    <div class="text-xl font-bold text-slate-700">${i.name}</div>
+                    <div class="text-2xl font-bold text-red-500 mb-4">RM ${i.price}</div>
+                    <button onclick="beliItem(${i.price}, '${i.name}', this)" 
+                            class="btn-3d bg-red-500 text-white py-2 px-6 rounded-lg font-bold w-full">
+                        Beli
+                    </button>
+                 </div>
+              `).join('')}
+           </div>
         </div>
       `;
     }
-    
-    function beliItem(price, itemName, buttonElement) {
-      if (window.zooBudget >= price) {
-        window.zooBudget -= price;
-        
-        const display = document.getElementById('budget-display');
-        display.textContent = `RM${window.zooBudget}`;
-        
-        buttonElement.disabled = true;
-        buttonElement.textContent = "Dibeli!";
-        buttonElement.classList.remove('bg-red-500', 'hover:bg-red-600');
-        buttonElement.classList.add('bg-gray-400', 'cursor-not-allowed');
-        
-        const msg = `Berjaya beli ${itemName}. Baki anda RM${window.zooBudget}.`;
-        setInfo(msg); speak(msg);
-      } else {
-        const msg = `Oh! Tidak cukup wang untuk ${itemName}. Baki anda hanya RM${window.zooBudget}.`;
-        setInfo(msg); speak(msg);
-        const display = document.getElementById('budget-display');
-        display.classList.add('shake');
-        setTimeout(()=>display.classList.remove('shake'), 500);
-      }
+
+    function beliItem(price, name, btn) {
+       if (zooBudget >= price) {
+          zooBudget -= price;
+          document.getElementById('budget-display').textContent = `RM ${zooBudget}`;
+          
+          // Update UI Button
+          btn.disabled = true;
+          btn.textContent = "Dibeli!";
+          btn.classList.remove('bg-red-500'); btn.classList.add('bg-slate-400');
+          
+          speak(`Berjaya beli ${name}. Baki RM${zooBudget}.`);
+          triggerWin();
+       } else {
+          speak("Duit tak cukup!");
+          document.getElementById('budget-display').parentElement.classList.add('shake');
+          setTimeout(()=>document.getElementById('budget-display').parentElement.classList.remove('shake'), 500);
+       }
     }
 
-    /* ====== Kawalan Umum ====== */
-    function clearActivity() {
-      currentActivity = 0;
-      document.getElementById('activity-content').innerHTML = `
-        <div class="text-center py-16">
-          <div class="text-6xl mb-4">💰</div>
-          <h2 class="text-3xl font-bold text-gray-800 mb-4">
-            Kemahiran Pemulihan: Jom Belajar Wang
-          </h2>
-          <p class="text-xl text-gray-600 mb-8">
-            Pilih aktiviti di bawah untuk meneroka menambah, menolak, dan menggunakan wang.
-          </p>
-          <div class="text-4xl">👇</div>
-        </div>
-      `;
-      setInfo("Pilih aktiviti untuk mula belajar tentang wang!");
-    }
-    
-    function nextActivity() {
-      if (currentActivity === 0) return loadActivity(1);
-      if (currentActivity < 5) return loadActivity(currentActivity + 1);
-      return loadActivity(1);
-    }
-
-    // Kekalkan TTS resume pada sesetengah pelayar
-    if ('speechSynthesis' in window) {
-      setInterval(() => { if (window.speechSynthesis.paused) window.speechSynthesis.resume(); }, 1000);
-    }
   </script>
 </body>
 </html>
